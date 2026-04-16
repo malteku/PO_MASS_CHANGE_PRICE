@@ -69,6 +69,9 @@ CLASS lcl_application DEFINITION FINAL.
     " Preisänderung via BAPI
     METHODS update_prices.
 
+    " Massenvorbelegung des neuen Preises
+    METHODS fill_mass_price.
+
     " ALV Event-Handler
     METHODS on_toolbar
       FOR EVENT toolbar OF cl_gui_alv_grid

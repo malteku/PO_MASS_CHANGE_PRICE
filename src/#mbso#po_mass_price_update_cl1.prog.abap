@@ -170,6 +170,20 @@ CLASS lcl_application IMPLEMENTATION.
       butn_type = 3
     ) TO e_object->mt_toolbar.
 
+    " Button "Preis vorbelegen" hinzufügen (MASS-ähnlich)
+    APPEND VALUE stb_button(
+      function  = 'FILL_MASS_PRICE'
+      icon      = icon_mass_change
+      quickinfo = 'Einen Preis in alle Positionen vorbelegen'
+      text      = 'Preis vorbelegen'
+      disabled  = space
+    ) TO e_object->mt_toolbar.
+
+    " Separator einfügen
+    APPEND VALUE stb_button(
+      butn_type = 3
+    ) TO e_object->mt_toolbar.
+
     " Button "Preise aktualisieren" hinzufügen
     APPEND VALUE stb_button(
       function  = 'UPDATE_PRICES'
@@ -185,6 +199,10 @@ CLASS lcl_application IMPLEMENTATION.
 *----------------------------------------------------------------------*
   METHOD on_user_command.
     CASE e_ucomm.
+      WHEN 'FILL_MASS_PRICE'.
+        " Preis in alle Positionen vorbelegen
+        fill_mass_price( ).
+
       WHEN 'UPDATE_PRICES'.
         " Eingaben aus dem Frontend in die interne Tabelle übernehmen
         alv_grid->check_changed_data( ).
@@ -195,6 +213,60 @@ CLASS lcl_application IMPLEMENTATION.
         " ALV aktualisieren, um Protokoll (Status + Meldung) anzuzeigen
         alv_grid->refresh_table_display( ).
     ENDCASE.
+  ENDMETHOD.
+
+*----------------------------------------------------------------------*
+* Massenvorbelegung: Einen Preis per Popup in alle Positionen eintragen
+*----------------------------------------------------------------------*
+  METHOD fill_mass_price.
+    " Eventuell vorhandene Eingaben aus dem ALV übernehmen
+    alv_grid->check_changed_data( ).
+
+    " Popup zur Preiseingabe anzeigen
+    DATA price_string TYPE string.
+
+    CALL FUNCTION 'POPUP_TO_GET_ONE_VALUE'
+      EXPORTING
+        textline1   = |Preis eingeben, der in alle Positionen übernommen wird:|
+        titel       = |Preis vorbelegen|
+        valuelength = 13
+      IMPORTING
+        value1      = price_string
+      EXCEPTIONS
+        OTHERS      = 1.
+
+    IF sy-subrc <> 0.
+      RETURN.
+    ENDIF.
+
+    " Abbruch wenn kein Wert eingegeben wurde
+    IF price_string IS INITIAL.
+      RETURN.
+    ENDIF.
+
+    " String in Preiswert konvertieren
+    DATA mass_price TYPE ekpo-netpr.
+    TRY.
+        mass_price = price_string.
+      CATCH cx_root.
+        MESSAGE |Ungültiger Preiswert eingegeben| TYPE 'S' DISPLAY LIKE 'E'.
+        RETURN.
+    ENDTRY.
+
+    IF mass_price <= 0.
+      MESSAGE |Bitte einen positiven Preis eingeben| TYPE 'S' DISPLAY LIKE 'W'.
+      RETURN.
+    ENDIF.
+
+    " Preis in alle Positionen vorbelegen
+    LOOP AT po_items ASSIGNING FIELD-SYMBOL(<item>).
+      <item>-new_price = mass_price.
+    ENDLOOP.
+
+    " ALV aktualisieren
+    alv_grid->refresh_table_display( ).
+
+    MESSAGE |Preis { mass_price } in { lines( po_items ) } Positionen vorbelegt| TYPE 'S'.
   ENDMETHOD.
 
 *----------------------------------------------------------------------*
