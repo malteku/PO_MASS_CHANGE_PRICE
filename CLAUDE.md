@@ -18,7 +18,7 @@ Jeder Report muss zwingend nach folgendem Muster mit drei Includes aufgebaut sei
 - **Moderne Syntax (7.50):** - Nutze Inline-Deklarationen: `DATA(lt_data) = ...` oder `READ TABLE ... ASSIGNING FIELD-SYMBOL(<fs_data>)`.
   - Nutze Konstruktor-Operatoren: `VALUE`, `NEW`, `CORRESPONDING`.
   - Nutze String-Templates: `|Text { lv_var }|`.
-- **Benennung:** - Variablen: Sprechende Namen (z.B. `sales_order_id` statt `lv_vbeln`).
+- **Benennung:** - Variablen: Sprechende Namen (z.B. `sales_order` statt `lv_vbeln`).
   - Methoden: Verben (z.B. `calculate_total` statt `calculation`).
   - Präfixe: Minimalistisch gemäß ABAP Clean Code (keine ungarische Notation wie `gt_`, `ls_`, außer es dient der Klarheit).
 - **Vermeide Obsolesztes:** Kein `TABLES`, kein `OCCURS`, keine `HEADER LINE`.
