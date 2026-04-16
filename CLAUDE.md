@@ -23,11 +23,10 @@ Jeder Report muss zwingend nach folgendem Muster mit drei Includes aufgebaut sei
 - **Vermeide Obsoleten Code:** Kein `TABLES`, kein `OCCURS`, keine `HEADER LINE`.
 
 ## S/4HANA Migration & Kompatibilität
-- **Tabellenzugriffe:** Vermeide direkte Zugriffe auf Tabellen, die in S/4HANA durch Views ersetzt wurden oder wegfallen (z.B. `VBUK`, `VBUP`). Nutze stattdessen die Kopf/Positions-Tabellen (`VBAK`, `VBAP`).
+- **Tabellenzugriffe:** Vermeide direkte Zugriffe auf Tabellen, die in S/4HANA durch Views ersetzt wurden oder wegfallen 
 - **Open SQL:** Nutze die neue Open-SQL-Syntax (Kommas als Trenner, Host-Variablen mit `@`).
 - **Funktionsbausteine:** Prüfe, ob es für Standard-Aufgaben bereits modernere Klassen gibt (z.B. `CL_SALV_TABLE` statt `REUSE_ALV`).
 - **Strikte Typisierung:** Nutze immer `TYPE` statt `LIKE` (außer bei Datenbankbezügen im `SELECT`).
 
 ## Befehle & Workflows
-- **Prüfung:** Führe immer den **Code Inspector (SCI)** oder die **ABAP Test Cockpit (ATC)** Prüfung durch.
 - **Dokumentation:** Kommentare auf Deutsch, technischer Fokus. Komplexe Logik wird in der Methode per ABAP Doc erklärt.
