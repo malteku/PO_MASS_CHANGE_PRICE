@@ -223,7 +223,7 @@ CLASS lcl_application IMPLEMENTATION.
     alv_grid->check_changed_data( ).
 
     " Popup zur Preiseingabe anzeigen
-    DATA price_string TYPE string.
+    DATA price_string TYPE c LENGTH 13.
 
     CALL FUNCTION 'POPUP_TO_GET_ONE_VALUE'
       EXPORTING
