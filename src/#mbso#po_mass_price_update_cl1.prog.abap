@@ -17,10 +17,14 @@ CLASS lcl_application IMPLEMENTATION.
     ENDIF.
 
     set_cell_styles( ).
+
+    " Dieser Befehl wechselt offiziell in den Listen-Modus (Screen 120)
+    LEAVE TO LIST-PROCESSING.
+
     display_alv( ).
 
-    " Listausgabe erzwingen, damit der Docking-Container sichtbar wird
-    WRITE space.
+    " Ein leeres WRITE sorgt dafür, dass der Screen 120 aktiv bleibt
+    WRITE: space.
   ENDMETHOD.
 
 *----------------------------------------------------------------------*
@@ -66,17 +70,41 @@ CLASS lcl_application IMPLEMENTATION.
 * ALV-Grid mit Docking-Container erstellen und Daten anzeigen
 *----------------------------------------------------------------------*
   METHOD display_alv.
-    " Docking-Container erzeugen (kein Dynpro nötig)
-    container = NEW cl_gui_docking_container(
-      ratio = 95
-      side  = cl_gui_docking_container=>dock_at_top
+
+    DATA: lo_alv TYPE REF TO cl_salv_table.
+
+
+
+    " Falls schon ein Container existiert (bei mehrmaligem Aufruf), diesen löschen
+*    IF container IS BOUND.
+*      container->free( ).
+*    ENDIF.
+*
+*    " Docking-Container erzeugen
+*    container = NEW cl_gui_docking_container(
+*      repid     = sy-repid
+*      dynnr     = '0120' " WICHTIG: Erzwungene Bindung an das Listen-Dynpro
+*      side      = cl_gui_docking_container=>dock_at_top
+*      extension = 1000   " Nutze extension statt ratio für stabilere Anzeige
+*    ).
+*
+*    " ALV-Grid erzeugen
+*    alv_grid = NEW cl_gui_alv_grid(
+*      i_parent = container
+*    ).
+
+    " Custom Container anstatt Docking Container
+    DATA: lo_custom_container TYPE REF TO cl_gui_custom_container.
+
+    " Hier referenzierst du den Namen, den du im Screen Painter vergeben hast (MY_CONTAINER)
+    lo_custom_container = NEW cl_gui_custom_container(
+      container_name = 'MY_CONTAINER'
     ).
 
-    " ALV-Grid erzeugen
     alv_grid = NEW cl_gui_alv_grid(
-      i_parent = container
+      i_parent = lo_custom_container
     ).
-
+*
     " Event-Handler registrieren
     SET HANDLER on_toolbar     FOR alv_grid.
     SET HANDLER on_user_command FOR alv_grid.
@@ -97,6 +125,7 @@ CLASS lcl_application IMPLEMENTATION.
     alv_grid->register_edit_event(
       i_event_id = cl_gui_alv_grid=>mc_evt_modified
     ).
+
   ENDMETHOD.
 
 *----------------------------------------------------------------------*
