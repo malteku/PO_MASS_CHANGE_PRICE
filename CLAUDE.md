@@ -19,9 +19,8 @@ Jeder Report muss zwingend nach folgendem Muster mit drei Includes aufgebaut sei
   - Nutze Konstruktor-Operatoren: `VALUE`, `NEW`, `CORRESPONDING`.
   - Nutze String-Templates: `|Text { lv_var }|`.
 - **Benennung:** - Variablen: Sprechende Namen (z.B. `sales_order` statt `lv_vbeln`).
-  - Methoden: Verben (z.B. `calculate_total` statt `calculation`).
   - Präfixe: Minimalistisch gemäß ABAP Clean Code (keine ungarische Notation wie `gt_`, `ls_`, außer es dient der Klarheit).
-- **Vermeide Obsolesztes:** Kein `TABLES`, kein `OCCURS`, keine `HEADER LINE`.
+- **Vermeide Obsoleten Code:** Kein `TABLES`, kein `OCCURS`, keine `HEADER LINE`.
 
 ## S/4HANA Migration & Kompatibilität
 - **Tabellenzugriffe:** Vermeide direkte Zugriffe auf Tabellen, die in S/4HANA durch Views ersetzt wurden oder wegfallen (z.B. `VBUK`, `VBUP`). Nutze stattdessen die Kopf/Positions-Tabellen (`VBAK`, `VBAP`).
