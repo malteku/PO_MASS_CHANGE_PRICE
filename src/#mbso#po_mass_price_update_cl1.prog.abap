@@ -174,11 +174,12 @@ CLASS lcl_application IMPLEMENTATION.
   METHOD update_prices.
     " Prüfen ob Änderungen vorhanden sind
     DATA(changes_exist) = abap_false.
-    LOOP AT po_items TRANSPORTING NO FIELDS
-      WHERE new_price > 0
-        AND new_price <> netpr.
-      changes_exist = abap_true.
-      EXIT.
+    LOOP AT po_items ASSIGNING FIELD-SYMBOL(<check>)
+      WHERE new_price > 0.
+      IF <check>-new_price <> <check>-netpr.
+        changes_exist = abap_true.
+        EXIT.
+      ENDIF.
     ENDLOOP.
 
     IF changes_exist = abap_false.
@@ -196,7 +197,6 @@ CLASS lcl_application IMPLEMENTATION.
     " Verarbeitung gruppiert nach Bestellnummer
     LOOP AT po_items ASSIGNING FIELD-SYMBOL(<item>)
       WHERE new_price > 0
-        AND new_price <> netpr
       GROUP BY <item>-ebeln.
 
       " Tabellen für aktuelle Bestellung initialisieren
@@ -205,6 +205,11 @@ CLASS lcl_application IMPLEMENTATION.
 
       " BAPI-Eingabetabellen für diese Bestellung aufbauen
       LOOP AT GROUP <item> ASSIGNING FIELD-SYMBOL(<group_item>).
+        " Nur Positionen mit tatsächlicher Preisänderung berücksichtigen
+        IF <group_item>-new_price = <group_item>-netpr.
+          CONTINUE.
+        ENDIF.
+
         " Positionsdaten mit neuem Preis
         APPEND VALUE bapimepoitem(
           po_item   = <group_item>-ebelp
@@ -218,6 +223,11 @@ CLASS lcl_application IMPLEMENTATION.
           net_price = 'X'
         ) TO po_itemx_tab.
       ENDLOOP.
+
+      " Keine echten Änderungen in dieser Bestellung -> überspringen
+      IF po_item_tab IS INITIAL.
+        CONTINUE.
+      ENDIF.
 
       " BAPI aufrufen
       CALL FUNCTION 'BAPI_PO_CHANGE'
@@ -246,11 +256,12 @@ CLASS lcl_application IMPLEMENTATION.
         " Erfolgsstatus in ALV-Tabelle setzen
         LOOP AT po_items ASSIGNING FIELD-SYMBOL(<result>)
           WHERE ebeln     = <item>-ebeln
-            AND new_price > 0
-            AND new_price <> netpr.
-          <result>-status_icon = icon_green_light.
-          <result>-message     = |Preis erfolgreich aktualisiert|.
-          <result>-netpr       = <result>-new_price.
+            AND new_price > 0.
+          IF <result>-new_price <> <result>-netpr.
+            <result>-status_icon = icon_green_light.
+            <result>-message     = |Preis erfolgreich aktualisiert|.
+            <result>-netpr       = <result>-new_price.
+          ENDIF.
         ENDLOOP.
       ELSE.
         " Fehler: Transaktion zurückrollen
@@ -259,10 +270,11 @@ CLASS lcl_application IMPLEMENTATION.
         " Fehlerstatus in ALV-Tabelle setzen
         LOOP AT po_items ASSIGNING <result>
           WHERE ebeln     = <item>-ebeln
-            AND new_price > 0
-            AND new_price <> netpr.
-          <result>-status_icon = icon_red_light.
-          <result>-message     = error_message.
+            AND new_price > 0.
+          IF <result>-new_price <> <result>-netpr.
+            <result>-status_icon = icon_red_light.
+            <result>-message     = error_message.
+          ENDIF.
         ENDLOOP.
       ENDIF.
 
